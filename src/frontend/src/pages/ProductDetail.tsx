@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { ArrowLeft, Minus, Plus, ShoppingBag } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { useCart } from "../context/CartContext";
@@ -78,7 +79,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 export default function ProductDetail() {
   const { id } = useParams({ from: "/product/$id" });
   const navigate = useNavigate();
-  const { addItem, setIsOpen } = useCart();
+  const { addItem } = useCart();
   const [selectedSize, setSelectedSize] = useState("M");
   const [quantity, setQuantity] = useState(1);
 
@@ -115,7 +116,10 @@ export default function ProductDetail() {
       quantity,
       imageUrl: product.imageUrl,
     });
-    setIsOpen(true);
+    toast.success(`${product.name} added to cart!`, {
+      description: `Size ${selectedSize} · Qty ${quantity} · Open cart when ready to checkout.`,
+      duration: 3000,
+    });
   };
 
   return (
@@ -159,7 +163,7 @@ export default function ProductDetail() {
               {product.name}
             </h1>
             <p className="text-3xl font-black text-purple-400 mb-6">
-              ${(product.priceCents / 100).toFixed(2)}
+              ₹{(product.priceCents / 100).toFixed(0)}
             </p>
             <p className="text-muted-foreground leading-relaxed mb-8">
               {product.description}
@@ -228,7 +232,7 @@ export default function ProductDetail() {
             </Button>
 
             <div className="mt-6 border border-border rounded-xl p-4 text-sm text-muted-foreground space-y-1">
-              <p>&#9889; Free shipping on orders over $50</p>
+              <p>&#9889; Free shipping on all orders</p>
               <p>&#128260; Easy 30-day returns</p>
               <p>&#128230; Ships within 2-3 business days</p>
             </div>

@@ -116,10 +116,14 @@ export default function CartDrawer() {
         {/* Footer */}
         {items.length > 0 && (
           <div className="p-6 border-t border-border space-y-4">
+            <div className="flex justify-between text-sm text-muted-foreground">
+              <span>Shipping</span>
+              <span className="text-green-400 font-bold">FREE 🚚</span>
+            </div>
             <div className="flex justify-between text-lg font-bold">
               <span>Total</span>
               <span className="text-purple-400">
-                ${(total / 100).toFixed(2)}
+                ₹{(total / 100).toFixed(0)}
               </span>
             </div>
             <Button

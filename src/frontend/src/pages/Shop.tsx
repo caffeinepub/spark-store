@@ -1,6 +1,7 @@
 import { Link, useSearch } from "@tanstack/react-router";
 import { ShoppingBag, Star } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { useCart } from "../context/CartContext";
@@ -76,7 +77,7 @@ export default function Shop() {
   const [activeCategory, setActiveCategory] = useState<string>(
     search.category || "all",
   );
-  const { addItem, setIsOpen } = useCart();
+  const { addItem } = useCart();
 
   useEffect(() => {
     setActiveCategory(search.category || "all");
@@ -95,7 +96,10 @@ export default function Shop() {
       quantity: 1,
       imageUrl: product.imageUrl,
     });
-    setIsOpen(true);
+    toast.success(`${product.name} added to cart!`, {
+      description: "View your cart when ready to checkout.",
+      duration: 2500,
+    });
   };
 
   return (
@@ -188,7 +192,7 @@ export default function Shop() {
                   </p>
                   <div className="flex items-center justify-between">
                     <span className="text-xl font-black text-purple-400">
-                      ${(product.priceCents / 100).toFixed(2)}
+                      ₹{(product.priceCents / 100).toFixed(0)}
                     </span>
                     <Button
                       size="sm"
