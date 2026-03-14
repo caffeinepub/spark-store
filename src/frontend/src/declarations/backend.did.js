@@ -75,6 +75,11 @@ export const Order = IDL.Record({
   'totalCents' : IDL.Nat,
   'items' : IDL.Vec(OrderItem),
 });
+export const UserProfile = IDL.Record({
+  'name' : IDL.Text,
+  'email' : IDL.Text,
+  'address' : IDL.Text,
+});
 export const Cart = IDL.Record({ 'items' : IDL.Vec(CartItem) });
 export const StripeSessionStatus = IDL.Variant({
   'completed' : IDL.Record({
@@ -147,15 +152,22 @@ export const idlService = IDL.Service({
   'deleteProduct' : IDL.Func([IDL.Text], [], []),
   'getAllOrders' : IDL.Func([IDL.Null], [IDL.Vec(Order)], ['query']),
   'getAllProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
+  'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getCart' : IDL.Func([IDL.Null], [Cart], ['query']),
   'getMyOrders' : IDL.Func([IDL.Null], [IDL.Vec(Order)], ['query']),
   'getOrder' : IDL.Func([IDL.Text], [Order], ['query']),
   'getProduct' : IDL.Func([IDL.Text], [Product], ['query']),
   'getStripeSessionStatus' : IDL.Func([IDL.Text], [StripeSessionStatus], []),
+  'getUserProfile' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Opt(UserProfile)],
+      ['query'],
+    ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
   'removeFromCart' : IDL.Func([CartItem], [], []),
+  'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
   'transform' : IDL.Func(
       [TransformationInput],
@@ -237,6 +249,11 @@ export const idlFactory = ({ IDL }) => {
     'totalCents' : IDL.Nat,
     'items' : IDL.Vec(OrderItem),
   });
+  const UserProfile = IDL.Record({
+    'name' : IDL.Text,
+    'email' : IDL.Text,
+    'address' : IDL.Text,
+  });
   const Cart = IDL.Record({ 'items' : IDL.Vec(CartItem) });
   const StripeSessionStatus = IDL.Variant({
     'completed' : IDL.Record({
@@ -306,15 +323,22 @@ export const idlFactory = ({ IDL }) => {
     'deleteProduct' : IDL.Func([IDL.Text], [], []),
     'getAllOrders' : IDL.Func([IDL.Null], [IDL.Vec(Order)], ['query']),
     'getAllProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
+    'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getCart' : IDL.Func([IDL.Null], [Cart], ['query']),
     'getMyOrders' : IDL.Func([IDL.Null], [IDL.Vec(Order)], ['query']),
     'getOrder' : IDL.Func([IDL.Text], [Order], ['query']),
     'getProduct' : IDL.Func([IDL.Text], [Product], ['query']),
     'getStripeSessionStatus' : IDL.Func([IDL.Text], [StripeSessionStatus], []),
+    'getUserProfile' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Opt(UserProfile)],
+        ['query'],
+      ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
     'removeFromCart' : IDL.Func([CartItem], [], []),
+    'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
     'transform' : IDL.Func(
         [TransformationInput],

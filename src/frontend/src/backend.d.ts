@@ -14,6 +14,11 @@ export class ExternalBlob {
     static fromBytes(blob: Uint8Array<ArrayBuffer>): ExternalBlob;
     withUploadProgress(onProgress: (percentage: number) => void): ExternalBlob;
 }
+export interface UserProfile {
+    name: string;
+    email: string;
+    address: string;
+}
 export interface TransformationOutput {
     status: bigint;
     body: Uint8Array;
@@ -116,15 +121,18 @@ export interface backendInterface {
     deleteProduct(productId: string): Promise<void>;
     getAllOrders(arg0: null): Promise<Array<Order>>;
     getAllProducts(): Promise<Array<Product>>;
+    getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getCart(arg0: null): Promise<Cart>;
     getMyOrders(arg0: null): Promise<Array<Order>>;
     getOrder(orderId: string): Promise<Order>;
     getProduct(productId: string): Promise<Product>;
     getStripeSessionStatus(sessionId: string): Promise<StripeSessionStatus>;
+    getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     isStripeConfigured(): Promise<boolean>;
     removeFromCart(item: CartItem): Promise<void>;
+    saveCallerUserProfile(profile: UserProfile): Promise<void>;
     setStripeConfiguration(config: StripeConfiguration): Promise<void>;
     transform(input: TransformationInput): Promise<TransformationOutput>;
     updateCartItemQuantity(item: CartItem): Promise<void>;

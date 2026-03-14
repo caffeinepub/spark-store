@@ -66,14 +66,43 @@ actor {
     createdAt : Int;
   };
 
+  public type UserProfile = {
+    name : Text;
+    email : Text;
+    address : Text;
+  };
+
   let products = Map.empty<Text, Product>();
   let carts = Map.empty<Principal, Cart>();
   let orders = Map.empty<Text, Order>();
+  let userProfiles = Map.empty<Principal, UserProfile>();
   var stripeConfig : ?Stripe.StripeConfiguration = null;
 
   let accessControlState = Authorization.initState();
   include MixinAuthorization(accessControlState);
   include MixinStorage();
+
+  // User Profile Management
+  public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
+    if (not (Authorization.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view profiles");
+    };
+    userProfiles.get(caller);
+  };
+
+  public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
+    if (caller != user and not Authorization.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Can only view your own profile");
+    };
+    userProfiles.get(user);
+  };
+
+  public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
+    if (not (Authorization.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can save profiles");
+    };
+    userProfiles.add(caller, profile);
+  };
 
   // Product management
   public query ({ caller }) func getProduct(productId : Text) : async Product {
@@ -352,11 +381,17 @@ actor {
     stripeConfig := ?config;
   };
 
-  public func getStripeSessionStatus(sessionId : Text) : async Stripe.StripeSessionStatus {
+  public shared ({ caller }) func getStripeSessionStatus(sessionId : Text) : async Stripe.StripeSessionStatus {
+    if (not (Authorization.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can check session status");
+    };
     await Stripe.getSessionStatus(getStripeConfiguration(), sessionId, transform);
   };
 
   public shared ({ caller }) func createCheckoutSession(items : [Stripe.ShoppingItem], successUrl : Text, cancelUrl : Text) : async Text {
+    if (not (Authorization.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can create checkout sessions");
+    };
     await Stripe.createCheckoutSession(getStripeConfiguration(), caller, items, successUrl, cancelUrl, transform);
   };
 };

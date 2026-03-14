@@ -75,6 +75,11 @@ export interface TransformationOutput {
   'body' : Uint8Array,
   'headers' : Array<http_header>,
 }
+export interface UserProfile {
+  'name' : string,
+  'email' : string,
+  'address' : string,
+}
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
@@ -124,15 +129,18 @@ export interface _SERVICE {
   'deleteProduct' : ActorMethod<[string], undefined>,
   'getAllOrders' : ActorMethod<[null], Array<Order>>,
   'getAllProducts' : ActorMethod<[], Array<Product>>,
+  'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getCart' : ActorMethod<[null], Cart>,
   'getMyOrders' : ActorMethod<[null], Array<Order>>,
   'getOrder' : ActorMethod<[string], Order>,
   'getProduct' : ActorMethod<[string], Product>,
   'getStripeSessionStatus' : ActorMethod<[string], StripeSessionStatus>,
+  'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'isStripeConfigured' : ActorMethod<[], boolean>,
   'removeFromCart' : ActorMethod<[CartItem], undefined>,
+  'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'setStripeConfiguration' : ActorMethod<[StripeConfiguration], undefined>,
   'transform' : ActorMethod<[TransformationInput], TransformationOutput>,
   'updateCartItemQuantity' : ActorMethod<[CartItem], undefined>,
