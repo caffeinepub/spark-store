@@ -1,7 +1,6 @@
 import { Link, useSearch } from "@tanstack/react-router";
 import { ShoppingBag, Star } from "lucide-react";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { useCart } from "../context/CartContext";
@@ -96,10 +95,6 @@ export default function Shop() {
       quantity: 1,
       imageUrl: product.imageUrl,
     });
-    toast.success(`${product.name} added to cart!`, {
-      description: "View your cart when ready to checkout.",
-      duration: 2500,
-    });
   };
 
   return (
@@ -116,7 +111,6 @@ export default function Shop() {
             Fresh fits. No compromise.
           </p>
         </div>
-
         <div
           className="flex items-center gap-3 mb-10 flex-wrap justify-center"
           role="tablist"
@@ -129,17 +123,12 @@ export default function Shop() {
               role="tab"
               aria-selected={activeCategory === cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-6 py-2 rounded-full text-sm font-semibold transition-all border ${
-                activeCategory === cat
-                  ? "bg-purple-600 border-purple-600 text-white glow-border"
-                  : "border-border text-muted-foreground hover:border-purple-600 hover:text-white"
-              }`}
+              className={`px-6 py-2 rounded-full text-sm font-semibold transition-all border ${activeCategory === cat ? "bg-purple-600 border-purple-600 text-white glow-border" : "border-border text-muted-foreground hover:border-purple-600 hover:text-white"}`}
             >
               {CATEGORY_LABELS[cat]}
             </button>
           ))}
         </div>
-
         {filtered.length === 0 ? (
           <div
             className="text-center py-24 text-muted-foreground"

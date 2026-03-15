@@ -58,10 +58,22 @@ export default function Navbar() {
           >
             <ShoppingBag size={22} />
             {count > 0 && (
-              <span className="absolute -top-1 -right-1 bg-purple-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+              <span
+                className="absolute -top-1 -right-1 bg-purple-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"
+                style={{
+                  animation: "cart-badge-pulse 1.5s ease-in-out infinite",
+                  boxShadow: "0 0 8px rgba(124,58,237,0.9)",
+                }}
+              >
                 {count}
               </span>
             )}
+            <style>{`
+              @keyframes cart-badge-pulse {
+                0%, 100% { box-shadow: 0 0 6px 1px rgba(124,58,237,0.9); transform: scale(1); }
+                50% { box-shadow: 0 0 14px 4px rgba(168,85,247,0.7); transform: scale(1.2); }
+              }
+            `}</style>
           </button>
 
           {isAuthenticated ? (

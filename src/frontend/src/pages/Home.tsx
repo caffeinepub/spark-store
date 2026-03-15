@@ -25,8 +25,8 @@ const categories = [
 
 const tickerItems = [
   { id: "t1", text: "✨ FREE SHIPPING ON ALL ORDERS" },
-  { id: "t2", text: "🔥 2 ITEMS → 10% OFF AT CHECKOUT" },
-  { id: "t3", text: "⚡ 3 ITEMS → 20% OFF AT CHECKOUT" },
+  { id: "t2", text: "🔥 BUY 2 → GET 10% COUPON AFTER PURCHASE" },
+  { id: "t3", text: "⚡ BUY 3 → GET 20% COUPON AFTER PURCHASE" },
   { id: "t4", text: "💥 USE CODE SPARK5 FOR 5% OFF" },
 ];
 
@@ -97,6 +97,45 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Floating particles */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          aria-hidden="true"
+        >
+          {[
+            { top: "15%", left: "10%", size: 6, delay: "0s", dur: "4s" },
+            { top: "25%", left: "80%", size: 4, delay: "0.8s", dur: "5s" },
+            { top: "60%", left: "5%", size: 5, delay: "1.5s", dur: "3.5s" },
+            { top: "70%", left: "90%", size: 7, delay: "0.3s", dur: "4.5s" },
+            { top: "40%", left: "15%", size: 4, delay: "2s", dur: "5.5s" },
+            { top: "50%", left: "85%", size: 5, delay: "1s", dur: "4s" },
+            { top: "80%", left: "30%", size: 6, delay: "0.5s", dur: "3.8s" },
+            { top: "20%", left: "55%", size: 4, delay: "1.8s", dur: "5s" },
+            { top: "75%", left: "65%", size: 5, delay: "0.2s", dur: "4.2s" },
+            { top: "35%", left: "45%", size: 3, delay: "2.5s", dur: "6s" },
+          ].map((p, i) => (
+            <div
+              key={`particle-${p.top}-${p.left}`}
+              className="absolute rounded-full"
+              style={{
+                top: p.top,
+                left: p.left,
+                width: p.size,
+                height: p.size,
+                background:
+                  i % 2 === 0
+                    ? "radial-gradient(circle, #a855f7, #7c3aed)"
+                    : "radial-gradient(circle, #ec4899, #db2777)",
+                boxShadow:
+                  i % 2 === 0
+                    ? "0 0 8px 2px rgba(168,85,247,0.8)"
+                    : "0 0 8px 2px rgba(236,72,153,0.8)",
+                animation: `float-particle ${p.dur} ease-in-out ${p.delay} infinite alternate`,
+              }}
+            />
+          ))}
+        </div>
+
         <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-purple-600/20 border border-purple-600/40 rounded-full px-4 py-2 mb-8 text-sm font-medium text-purple-300">
             <Zap size={14} fill="currentColor" /> New Drop Available
@@ -152,6 +191,10 @@ export default function Home() {
         @keyframes orbit-ccw {
           from { transform: rotate(0deg); }
           to { transform: rotate(-360deg); }
+        }
+        @keyframes float-particle {
+          0% { transform: translateY(0) scale(1); opacity: 0.8; }
+          100% { transform: translateY(-30px) scale(0.6); opacity: 0.2; }
         }
       `}</style>
 

@@ -5,9 +5,13 @@ import {
   createRoute,
   createRouter,
 } from "@tanstack/react-router";
+import AddedToCartPopup from "./components/AddedToCartPopup";
 import CartDrawer from "./components/CartDrawer";
+import DealBar from "./components/DealBar";
 import Navbar from "./components/Navbar";
 import { CartProvider } from "./context/CartContext";
+import { OrdersProvider } from "./context/OrdersContext";
+import { StoreSettingsProvider } from "./context/StoreSettingsContext";
 import Admin from "./pages/Admin";
 import Checkout from "./pages/Checkout";
 import Home from "./pages/Home";
@@ -16,11 +20,19 @@ import Shop from "./pages/Shop";
 
 function RootLayout() {
   return (
-    <CartProvider>
-      <Navbar />
-      <CartDrawer />
-      <Outlet />
-    </CartProvider>
+    <StoreSettingsProvider>
+      <OrdersProvider>
+        <CartProvider>
+          <Navbar />
+          <CartDrawer />
+          <AddedToCartPopup />
+          <div className="pb-14">
+            <Outlet />
+          </div>
+          <DealBar />
+        </CartProvider>
+      </OrdersProvider>
+    </StoreSettingsProvider>
   );
 }
 

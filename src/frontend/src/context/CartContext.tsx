@@ -16,15 +16,34 @@ export interface CartItem {
   imageUrl: string;
 }
 
-const COUPON_MAP: Record<string, { type: "percent" | "flat"; value: number }> =
-  {
-    SPARK5: { type: "percent", value: 5 },
-    SPARK8: { type: "percent", value: 8 },
-    SPARK10: { type: "percent", value: 10 },
-    SPARK15: { type: "percent", value: 15 },
-    FREESP: { type: "flat", value: 5000 }, // ₹50 flat off in paise
-    SPARK20: { type: "percent", value: 20 },
-  };
+export interface DynamicCoupon {
+  code: string;
+  type: "percent" | "flat";
+  value: number;
+  used: boolean;
+}
+
+const STATIC_COUPON_MAP: Record<
+  string,
+  { type: "percent" | "flat"; value: number }
+> = {
+  SPARK5: { type: "percent", value: 5 },
+  FREESP: { type: "flat", value: 5000 },
+};
+
+function loadDynamicCoupons(): DynamicCoupon[] {
+  try {
+    const raw = localStorage.getItem("spark_dynamic_coupons");
+    if (raw) return JSON.parse(raw) as DynamicCoupon[];
+  } catch {
+    // ignore
+  }
+  return [];
+}
+
+function persistDynamicCoupons(coupons: DynamicCoupon[]) {
+  localStorage.setItem("spark_dynamic_coupons", JSON.stringify(coupons));
+}
 
 interface CartContextType {
   items: CartItem[];
@@ -36,7 +55,6 @@ interface CartContextType {
   count: number;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
-  // Coupon
   couponCode: string | null;
   couponDiscount: number;
   couponError: string | null;
@@ -44,11 +62,20 @@ interface CartContextType {
   flatCouponValue: number;
   applyCoupon: (code: string) => void;
   removeCoupon: () => void;
-  // Discounts
+  markCouponUsed: (code: string) => void;
+  registerDynamicCoupon: (
+    code: string,
+    type: "percent" | "flat",
+    value: number,
+  ) => void;
   autoDiscount: number;
   effectiveDiscount: number;
   discountedTotal: number;
   totalSavings: number;
+  showAddedPopup: boolean;
+  lastAddedName: string;
+  dismissAddedPopup: () => void;
+  dynamicCoupons: DynamicCoupon[];
 }
 
 const CartContext = createContext<CartContextType | null>(null);
@@ -61,6 +88,39 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [couponError, setCouponError] = useState<string | null>(null);
   const [isFlatCoupon, setIsFlatCoupon] = useState(false);
   const [flatCouponValue, setFlatCouponValue] = useState(0);
+  const [showAddedPopup, setShowAddedPopup] = useState(false);
+  const [lastAddedName, setLastAddedName] = useState("");
+  const [dynamicCoupons, setDynamicCoupons] =
+    useState<DynamicCoupon[]>(loadDynamicCoupons);
+
+  const registerDynamicCoupon = useCallback(
+    (code: string, type: "percent" | "flat", value: number) => {
+      const upper = code.trim().toUpperCase();
+      setDynamicCoupons((prev) => {
+        // Don't re-register if already exists and not used
+        if (prev.find((c) => c.code === upper && !c.used)) return prev;
+        const filtered = prev.filter((c) => c.code !== upper);
+        const next: DynamicCoupon[] = [
+          ...filtered,
+          { code: upper, type, value, used: false },
+        ];
+        persistDynamicCoupons(next);
+        return next;
+      });
+    },
+    [],
+  );
+
+  const markCouponUsed = useCallback((code: string) => {
+    const upper = code.trim().toUpperCase();
+    setDynamicCoupons((prev) => {
+      const next = prev.map((c) =>
+        c.code === upper ? { ...c, used: true } : c,
+      );
+      persistDynamicCoupons(next);
+      return next;
+    });
+  }, []);
 
   const addItem = useCallback((newItem: CartItem) => {
     setItems((prev) => {
@@ -76,7 +136,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return [...prev, newItem];
     });
+    setLastAddedName(newItem.productName);
+    setShowAddedPopup(true);
   }, []);
+
+  const dismissAddedPopup = useCallback(() => setShowAddedPopup(false), []);
 
   const removeItem = useCallback((productId: string, size: string) => {
     setItems((prev) =>
@@ -101,29 +165,60 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = useCallback(() => setItems([]), []);
 
-  const applyCoupon = useCallback((code: string) => {
-    const upper = code.trim().toUpperCase();
-    const coupon = COUPON_MAP[upper];
-    if (!coupon) {
-      setCouponError("Invalid coupon code");
+  const applyCoupon = useCallback(
+    (code: string) => {
+      const upper = code.trim().toUpperCase();
+
+      // Check dynamic coupons first
+      const dynCoupon = dynamicCoupons.find((c) => c.code === upper);
+      if (dynCoupon) {
+        if (dynCoupon.used) {
+          setCouponError("This coupon has already been used");
+          setCouponCode(null);
+          setCouponDiscount(0);
+          setIsFlatCoupon(false);
+          setFlatCouponValue(0);
+          return;
+        }
+        setCouponError(null);
+        setCouponCode(upper);
+        if (dynCoupon.type === "flat") {
+          setIsFlatCoupon(true);
+          setFlatCouponValue(dynCoupon.value);
+          setCouponDiscount(0);
+        } else {
+          setIsFlatCoupon(false);
+          setFlatCouponValue(0);
+          setCouponDiscount(dynCoupon.value);
+        }
+        return;
+      }
+
+      // Check static coupons
+      const staticCoupon = STATIC_COUPON_MAP[upper];
+      if (staticCoupon) {
+        setCouponError(null);
+        setCouponCode(upper);
+        if (staticCoupon.type === "flat") {
+          setIsFlatCoupon(true);
+          setFlatCouponValue(staticCoupon.value);
+          setCouponDiscount(0);
+        } else {
+          setIsFlatCoupon(false);
+          setFlatCouponValue(0);
+          setCouponDiscount(staticCoupon.value);
+        }
+        return;
+      }
+
+      setCouponError("Invalid coupon code. Earn coupons by shopping with us!");
       setCouponCode(null);
       setCouponDiscount(0);
       setIsFlatCoupon(false);
       setFlatCouponValue(0);
-      return;
-    }
-    setCouponError(null);
-    setCouponCode(upper);
-    if (coupon.type === "flat") {
-      setIsFlatCoupon(true);
-      setFlatCouponValue(coupon.value);
-      setCouponDiscount(0);
-    } else {
-      setIsFlatCoupon(false);
-      setFlatCouponValue(0);
-      setCouponDiscount(coupon.value);
-    }
-  }, []);
+    },
+    [dynamicCoupons],
+  );
 
   const removeCoupon = useCallback(() => {
     setCouponCode(null);
@@ -135,12 +230,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const total = items.reduce((sum, i) => sum + i.priceCents * i.quantity, 0);
   const count = items.reduce((sum, i) => sum + i.quantity, 0);
-
-  // 1 item = 0%, 2 items = 10%, 3+ items = 20%
-  const autoDiscount = count === 2 ? 10 : count >= 3 ? 20 : 0;
+  const autoDiscount = 0;
 
   const { effectiveDiscount, discountedTotal, totalSavings } = useMemo(() => {
-    // Percent coupons STACK on top of auto discount (e.g. SPARK5 always gives 5% extra)
     const effDisc = isFlatCoupon
       ? autoDiscount
       : Math.min(autoDiscount + couponDiscount, 100);
@@ -152,7 +244,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       discountedTotal: after,
       totalSavings: savings,
     };
-  }, [total, autoDiscount, couponDiscount, isFlatCoupon, flatCouponValue]);
+  }, [total, couponDiscount, isFlatCoupon, flatCouponValue]);
 
   return (
     <CartContext.Provider
@@ -173,10 +265,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         flatCouponValue,
         applyCoupon,
         removeCoupon,
+        markCouponUsed,
+        registerDynamicCoupon,
         autoDiscount,
         effectiveDiscount,
         discountedTotal,
         totalSavings,
+        showAddedPopup,
+        lastAddedName,
+        dismissAddedPopup,
+        dynamicCoupons,
       }}
     >
       {children}

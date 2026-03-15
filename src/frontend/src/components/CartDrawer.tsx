@@ -67,7 +67,7 @@ export default function CartDrawer() {
                     Size: {item.size}
                   </p>
                   <p className="text-purple-400 font-bold">
-                    ${(item.priceCents / 100).toFixed(2)}
+                    ₹{(item.priceCents / 100).toFixed(0)}
                   </p>
                   <div className="flex items-center gap-2 mt-2">
                     <button

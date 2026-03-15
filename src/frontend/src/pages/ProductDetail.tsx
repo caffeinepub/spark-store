@@ -1,7 +1,6 @@
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { ArrowLeft, Minus, Plus, ShoppingBag } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { useCart } from "../context/CartContext";
@@ -15,7 +14,7 @@ const SAMPLE_PRODUCTS = [
     featured: true,
     imageUrl: "/assets/generated/tshirt-1.dim_600x700.jpg",
     description:
-      "The OG graphic tee. Bold. Clean. Yours. Made from 100% premium cotton with a relaxed fit. The SPARK STORE lightning bolt graphic is heat-pressed for durability that lasts.",
+      "The OG graphic tee. Bold. Clean. Yours. Made from 100% premium cotton with a relaxed fit.",
   },
   {
     id: "s2",
@@ -25,7 +24,7 @@ const SAMPLE_PRODUCTS = [
     featured: false,
     imageUrl: "/assets/generated/tshirt-2.dim_600x700.jpg",
     description:
-      "Oversized fit for maximum drip. Drop-shoulder silhouette with a neon purple print. Unisex sizing.",
+      "Oversized fit for maximum drip. Drop-shoulder silhouette with a neon purple print.",
   },
   {
     id: "s3",
@@ -35,7 +34,7 @@ const SAMPLE_PRODUCTS = [
     featured: true,
     imageUrl: "/assets/generated/hoodie-1.dim_600x700.jpg",
     description:
-      "The hoodie that hits different. Heavy GSM fleece with embroidered branding and kangaroo pocket.",
+      "The hoodie that hits different. Heavy GSM fleece with embroidered branding.",
   },
   {
     id: "s4",
@@ -116,10 +115,6 @@ export default function ProductDetail() {
       quantity,
       imageUrl: product.imageUrl,
     });
-    toast.success(`${product.name} added to cart!`, {
-      description: `Size ${selectedSize} · Qty ${quantity} · Open cart when ready to checkout.`,
-      duration: 3000,
-    });
   };
 
   return (
@@ -134,7 +129,6 @@ export default function ProductDetail() {
         >
           <ArrowLeft size={16} /> Back to Shop
         </button>
-
         <div className="grid md:grid-cols-2 gap-12">
           <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-card">
             <img
@@ -148,7 +142,6 @@ export default function ProductDetail() {
               </Badge>
             )}
           </div>
-
           <div className="flex flex-col py-4">
             <Badge
               variant="outline"
@@ -168,7 +161,6 @@ export default function ProductDetail() {
             <p className="text-muted-foreground leading-relaxed mb-8">
               {product.description}
             </p>
-
             <div className="mb-6">
               <p className="text-sm font-semibold mb-3 uppercase tracking-widest text-muted-foreground">
                 Select Size
@@ -182,18 +174,13 @@ export default function ProductDetail() {
                     type="button"
                     key={size}
                     onClick={() => setSelectedSize(size)}
-                    className={`w-12 h-12 rounded-lg border text-sm font-bold transition-all ${
-                      selectedSize === size
-                        ? "border-purple-600 bg-purple-600 text-white glow-border"
-                        : "border-border hover:border-purple-600 text-muted-foreground hover:text-white"
-                    }`}
+                    className={`w-12 h-12 rounded-lg border text-sm font-bold transition-all ${selectedSize === size ? "border-purple-600 bg-purple-600 text-white glow-border" : "border-border hover:border-purple-600 text-muted-foreground hover:text-white"}`}
                   >
                     {size}
                   </button>
                 ))}
               </div>
             </div>
-
             <div className="mb-8">
               <p className="text-sm font-semibold mb-3 uppercase tracking-widest text-muted-foreground">
                 Quantity
@@ -221,7 +208,6 @@ export default function ProductDetail() {
                 </button>
               </div>
             </div>
-
             <Button
               data-ocid="product.add_button"
               size="lg"
@@ -230,7 +216,6 @@ export default function ProductDetail() {
             >
               <ShoppingBag size={20} className="mr-2" /> Add to Cart
             </Button>
-
             <div className="mt-6 border border-border rounded-xl p-4 text-sm text-muted-foreground space-y-1">
               <p>&#9889; Free shipping on all orders</p>
               <p>&#128260; Easy 30-day returns</p>
